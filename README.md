@@ -1,3 +1,5 @@
+- MODIFIED VERSION
+
 [ ![Codeship Status for stevejenkins/postwhite](https://app.codeship.com/projects/8cd4ff10-77b6-0133-22fe-02534086190b/status?branch=master)](https://app.codeship.com/projects/118483) [![Issue Count](https://codeclimate.com/github/stevejenkins/postwhite/badges/issue_count.svg)](https://codeclimate.com/github/stevejenkins/postwhite)
 
 # Postwhite - Automatic Postcreen Whitelist & Blacklist Generator
@@ -37,11 +39,13 @@ I recommend cloning both the SPF-Tools and the Postwhite repos into your ```/usr
 
     @daily /usr/local/bin/postwhite/postwhite > /dev/null 2>&1 #Update Postscreen Whitelists
 
-I also recommend updating the list of known Yahoo! IP outbound mailers weekly:
+I also recommend updating the lists of scraped mailers weekly:
 
-    @weekly /usr/local/bin/postwhite/scrape_yahoo > /dev/null 2>&1 #Update Yahoo! IPs for Postscreen Whitelists
+    @weekly /usr/local/bin/postwhite/scrape_verizonmedia > /dev/null 2>&1 #Update VerizonMedia(Verizon/AOL/Yahoo)! IPs for Postscreen Whitelists
+    @weekly /usr/local/bin/postwhite/scrape_zuora > /dev/null 2>&1 #Update Zuora! IPs for Postscreen Whitelists
+    @weekly /usr/local/bin/postwhite/scrape_ovh > /dev/null 2>&1 #Update OVH! IPs for Postscreen Whitelists
 
-*(Please read more about Yahoo! hosts below)*
+*(Please read more about VerizonMedia! hosts below)*
 
 When executed, Postwhite will generate a file named ```postscreen_spf_whitelist.cidr```, write it to your Postfix directory, then reload Postfix to pick up any changes.
 
@@ -76,18 +80,18 @@ To add your own additional custom hosts, add them to the ```custom_hosts``` sect
 Additional trusted mailers are added to the script from time to time, so check back periodically for new versions, or "Watch" this repo to receive update notifications.
 
 ## Hosts that Don't Publish their Outbound Mailers via SPF Records
-Because Postwhite relies on published SPF records to build its whitelist, mailers who refuse to publish outbound mailer IP addresses via SPF are problematic. The largest such host is Yahoo!, which is dealt with separately (see below). For smaller mailhosts without SPF-published mailer lists, the included `query_host_ovh` file is a working example of a script that queries a range of hostnames for a specific mailer (`mail-out.ovh.net` in the included example), collects valid IP addresses, and includes them in a custom whitelist. The new custom whitelist may then be included in as an additional entry in your Postfix's `postscreen_access_list` parameter (see **Usage** above). An example of the `query_host_ovh` file's output is included in the `/examples/` folder as `postscreen_ovh_whitelist.cidr`.
+Because Postwhite relies on published SPF records to build its whitelist, mailers who refuse to publish outbound mailer IP addresses via SPF are problematic. The largest such host is VerizonMedia!, which is dealt with separately (see below). For smaller mailhosts without SPF-published mailer lists, the included `query_host_ovh` file is a working example of a script that queries a range of hostnames for a specific mailer (`mail-out.ovh.net` in the included example), collects valid IP addresses, and includes them in a custom whitelist. The new custom whitelist may then be included in as an additional entry in your Postfix's `postscreen_access_list` parameter (see **Usage** above). An example of the `query_host_ovh` file's output is included in the `/examples/` folder as `postscreen_ovh_whitelist.cidr`.
 
 To create additional customized query scripts for mailers that don't publish outbound IPs via SPF, copy the example `query_host_ovh` file to a new unique filename, edit the script's mailhost and numerical range values as required, set a unique output file (`/etc/postfix/postscreen_*_whitelist.cidr`), include the output file in Postfix's `postscreen_access_list` parameter, then configure cron to run the new query script periodically.
 
 Depending on the size of the range you wish to query, this script could take a long time to complete. I recommend testing on a small fraction of the mailhost's range before pushing the script to a production environment.
 
-## Yahoo! Hosts
-As mentioned in the **Known Issues**, Yahoo!'s SPF record doesn't support queries to expose their netblocks, and therefore a dynamic list of Yahoo mailers can't be built. However, Yahoo! does publish a list of outbound mailer IP addresses at https://help.yahoo.com/kb/SLN23997.html.
+## VerizonMedia Hosts - (Verizon/AOL/Yahoo)
+VerizonMedia's SPF record doesn't support queries to expose their netblocks, and therefore a dynamic list of VerizonMedia mailers can't be built. However, VerizonMedia! does publish a list of outbound mailer IP addresses at https://postmaster.verizonmedia.com/mail-server.
 
-A list of Yahoo! outbound IP addresses, based on the linked knowledgebase article and formatted for Postwhite, is included as ```yahoo_static_hosts.txt```. By default, the contents of this file are added to the final whitelist. To disable the Yahoo! IPs from being included in your whitelist, set the ```include_yahoo``` configuration option in ```/etc/postwhite.conf``` to ```include_yahoo="no"```.
+A list of VerizonMedia! outbound IP addresses, based on the linked knowledgebase article and formatted for Postwhite, is included as ```verizonmedia_static_hosts.txt```. By default, the contents of this file are added to the final whitelist. To disable the VerizonMedia! IPs from being included in your whitelist, set the ```include_verizonmedia``` configuration option in ```/etc/postwhite.conf``` to ```include_verizonmedia="no"```.
 
-The ```yahoo_static_hosts.txt``` file can be periodically updated by running the ```scrape_yahoo``` script, which requires either **Wget** or **cURL** (included on most systems). The ```scrape_yahoo``` script reads the Postwhite config file for the location to write the updated list of Yahoo! oubound IP addresses. Run the ```scrape_yahoo``` script periodically via cron (I recommend no more than weekly) to automatically update the list of Yahoo! IPs used by Postwhite.
+The ```verizonmedia_static_hosts.txt``` file can be periodically updated by running the ```scrape_verizonmedia``` script, which requires either **Wget** or **cURL** (included on most systems). The ```scrape_verizonmedia``` script reads the Postwhite config file for the location to write the updated list of VerizonMedia! oubound IP addresses. Run the ```scrape_verizonmedia``` script periodically via cron (I recommend no more than weekly) to automatically update the list of VerizonMedia! IPs used by Postwhite.
 
 ## Blacklisting
 To enable blacklisting, set ```enable_blacklist=yes``` and then list blacklisted hosts in ```blacklist_hosts```. Please refer to the blacklisting warning above. Blacklisting is not the primary purpose of Postwhite, and most users will never need to turn it on.
@@ -109,7 +113,7 @@ Other options in ```postwhite.conf``` include changing the filenames for your wh
 * Thanks to Jan Sarenik (author of <a target="_blank" href="https://github.com/jsarenik/spf-tools">SPF-Tools</a>).
 * Thanks to <a target="_blank" href="https://github.com/jcbf">Jose Borges Ferreira</a> for patches and contributions to Postwhite, include internal code to validate CIDRs.
 * Thanks to <a target="_blank" href="https://github.com/corrideat">Ricardo Iván Vieitez Parra</a> for contributions to Postwhite, including external config file support, normalization improvements, error handling, and additional modifications that allow Postwhite to run on additional systems.
-* Thanks to partner (business... not life) <a target="_blank" href="http://stevecook.net/">Steve Cook</a> for helping me cludge through Bash scripting, and for writing the initial version of the ```scrape_yahoo``` script.
+* Thanks to partner (business... not life) <a target="_blank" href="http://stevecook.net/">Steve Cook</a> for helping me cludge through Bash scripting, and for writing the initial version of the ```scrape_yahoo``` now known as ```scrape_verizonmedia``` script.
 * Thanks to all the generous [contributors](https://github.com/stevejenkins/postwhite/graphs/contributors) right here on GitHub who have helped move the project along!
 
 # More Info
@@ -118,7 +122,7 @@ My blog post discussing how Postwhite came to be is here:
 http://www.stevejenkins.com/blog/2015/11/postscreen-whitelisting-smtp-outbound-ip-addresses-large-webmail-providers/
 
 # Known Issues
-* I'd love to include Yahoo's IPs in the whitelist via the same methods used for all other mails, but their SPF record doesn't support queries to expose their netblocks. The included ```scrape_yahoo``` script, which creates a static list of Yahoo! IPs by scraping their web page, is an acceptable work-around, but if you have a suggestion for a more elegant solution, please create an issue and let me know, or create a pull request.
+* I'd love to include VerizonMedia's (Verizon/AOL/Yahoo) IPs in the whitelist via the same methods used for all other mails, but their SPF record doesn't support queries to expose their netblocks. The included ```scrape_verizonmedia``` script, which creates a static list of VerizonMedia! IPs by scraping their web page, is an acceptable work-around, but if you have a suggestion for a more elegant solution, please create an issue and let me know, or create a pull request.
 
 * I have no way of validating IPv6 CIDRs yet. For now, the script assumes all SPF-published IPv6 CIDRs are valid and includes them in the whitelist.
 

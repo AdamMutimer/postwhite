@@ -6,8 +6,8 @@
 # By Steve Jenkins (https://www.stevejenkins.com/)                #
 ###################################################################
 
-version="3.4"
-lastupdated="14 April 2018"
+version="3.7"
+lastupdated="15 June 2021"
 
 # Usage: 1) Place entire /postwhite directory in /usr/local/bin
 #	 2) Move postwhite.conf to /etc
@@ -36,20 +36,31 @@ lastupdated="14 April 2018"
 # CUSTOM HOSTS CAN BE ADDED IN /etc/postwhite.conf
 
 # Hosts to query
-webmail_hosts="aol.com fastmail.com google.com gmx.com hotmail.com icloud.com \
-	inbox.com mail.com microsoft.com outlook.com secure-mailgate.com zoho.com"
+webmail_hosts="aol.com fastmail.com google.com gmail.com gmx.com hotmail.com icloud.com \
+	inbox.com mail.com microsoft.com e-mail.microsoft.com outlook.com secure-mailgate.com \
+	zoho.com simplelogin.co qq.com mail.ru yandex.ru rambler.ru protonmail.com gmx.com"
 
 social_hosts="facebook.com facebookmail.com instagram.com linkedin.com \
-	pinterest.com reddit.com tumblr.com twitter.com"
+	pinterest.com reddit.com tumblr.com twitter.com twitch.tv"
 
-commerce_hosts="amazon.com craigslist.org ebay.com paypal.com"
+commerce_hosts="amazon.com craigslist.org ebay.com paypal.com email.gog.com email2.gog.com \
+	gog.com	steampowered.com notice.aliexpress.com aliexpress.com booking.com ozsale.com.au \
+	intuit.com xero.com myob.com stripe.com 2checkout.com pandadoc.com docusign.com netflix.com \
+	disneyplus.com stan.com.au hulu.com.au"
 
 bulk_hosts="amazonses.com authsmtp.com constantcontact.com \
 	cust-spf.exacttarget.com exacttarget.com fbmta.com fishbowl.com \
 	icontact.com mailchimp.com mailgun.com mailjet.com messagelabs.com \
-	messagegears.net sendgrid.com sendgrid.net sparkpost.com sparkpostmail.com"
+	messagegears.net sendgrid.com sendgrid.net sparkpost.com sparkpostmail.com \
+	alibabacloud.com spf1.dm.aliyun.com aliyun.com relay.mailchannels.net mailchannels.net \
+	srv2.de"
+	
+isp_hosts="optusnet.com.au bigpond.com iinet.net.au internode.on.net apn.net.au \
+	activ8.net.au spirit.com.au tpg.com.au telstra.com.au"
 
-misc_hosts="github.com zendesk.com"
+misc_hosts="github.com zendesk.com adobe.com repairtechsolutions.com repairshopr.com simple-help.com \
+	freshdesk.com sender1.freshdesk.com sender2.freshdesk.com emailus.freshdesk.com emaileuc.freshdesk.com \
+	sg-warmup.freshemail.io"
 
 permit_line_v4="%s\tpermit\n"
 reject_line_v4="%s\treject\n"
@@ -155,6 +166,7 @@ normalize_ip() {
 
 # Create host query function
 query_host() {
+	printf "Processing: $1...\n"
 	"${spftoolspath}"/despf.sh "$1" | (grep -Ei ^ip || true ) >> "${tmp1}"
 }
 
@@ -247,6 +259,12 @@ for h in ${misc_hosts}; do
 	query_host "${h}"
 done
 
+printf "\nQuerying ISP hosts...\n"
+
+for h in ${isp_hosts}; do
+	query_host "${h}"
+done
+
 printf "\nQuerying custom hosts...\n"
 
 for h in ${custom_hosts}; do
@@ -254,9 +272,27 @@ for h in ${custom_hosts}; do
 done
 
 if [ x"$include_yahoo" = x"yes" ] ; then
-	printf "\nIncluding scraped Yahoo! outbound hosts...\n"
+	printf "\nIncluding scraped Yahoo/AOL! outbound hosts...\n"
 
 	cat "${yahoo_static_hosts}" >> "${tmp1}"
+fi
+
+if [ x"$include_zuora" = x"yes" ] ; then
+	printf "\nIncluding scraped Zuora! outbound hosts...\n"
+	
+	cat "${zuora_static_hosts}" >> "${tmp1}"
+fi
+
+if [ x"$include_ovh" = x"yes" ] ; then
+        printf "\nIncluding scraped OVH! outbound hosts...\n"
+
+        cat "${ovh_static_hosts}" >> "${tmp1}"
+fi
+
+if [ x"$include_custom" = x"yes" ] ; then
+        printf "\nIncluding Custom IP outbound hosts...\n"
+
+        cat "${custom_user_hosts}" >> "${tmp1}"
 fi
 
 if [ x"$enable_blacklist" = x"yes" ] ; then
@@ -271,7 +307,7 @@ fi
 if [ x"$simplify" = x"yes" ]; then
 	printf "\nSimplifying whitelist IP addresses already included in CIDR ranges. These calculations\n"
 	printf "can take a LONG time if you have many mailers selected. Please be patient..."
-	
+
 	sed '/\./s/\/32//g' "${tmp1}" | sort -u | "${spftoolspath}"/simplify.sh > "${tmp2}" &
 	show_dots "$!"
 
@@ -281,7 +317,7 @@ if [ x"$simplify" = x"yes" ]; then
 			cat "${blktmp1}" | sort -u | "${spftoolspath}"/simplify.sh > "${blktmp2}" &
 			show_dots "$!"
 	fi
-	
+
 	printf "\nIP address simplification complete.\n"
 else
 	sed '/\./s/\/32//g' "${tmp1}" > "${tmp2}"
@@ -383,10 +419,18 @@ cleanup() {
 }
 cleanup
 
-# Reload Postfix to pick up changes in whitelist
-if [ x"$reload_postfix" = x"yes" ]; then
-printf '\nReloading Postfix configuration to refresh rules...\n'
+# Postfix Task
+if [ x"$postfix_task" = x"reload" ]; 
+then
+	printf '\nReloading Postfix configuration to refresh rules...\n'
 	${postfixbinarypath}/postfix reload
+
+elif [ x"$postfix_task" = x"restart" ]; 
+then
+	printf '\nRestarting Postfix...\n'
+	/usr/bin/systemctl restart postfix
+else
+	printf '\nNo task for Postfix...\n'
 fi
 
 printf '\nDone!\n'
