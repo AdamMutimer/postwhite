@@ -70,9 +70,12 @@ done > "${temp_file}"
 # in testing, the mo${b}.mail-out.ovh.net level resolves to an address,
 # so for efficiency we'll skip any that don't resolve
 
-for b in {1..300}; do
+# 2022/05/22 - OVH have moved ${v} outside of 300 range
+# 1.mo301.mail-out.ovh.net
+
+for b in {1..399}; do
     if ( host mo${b}.mail-out.ovh.net 2>&1 ); then
-        for a in {1..99}; do
+        for a in {1..199}; do
             host ${a}.mo${b}.mail-out.ovh.net 2>&1
         done;
 

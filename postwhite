@@ -53,7 +53,7 @@ bulk_hosts="amazonses.com authsmtp.com constantcontact.com \
 	icontact.com mailchimp.com mailgun.com mailjet.com messagelabs.com \
 	messagegears.net sendgrid.com sendgrid.net sparkpost.com sparkpostmail.com \
 	alibabacloud.com spf1.dm.aliyun.com aliyun.com relay.mailchannels.net mailchannels.net \
-	srv2.de mx.ovh.com smtp2go.com spf.smtp2go.com"
+	srv2.de mx.ovh.com smtp2go.com spf.smtp2go.com jangomail.com"
 	
 isp_hosts="optusnet.com.au bigpond.com iinet.net.au internode.on.net apn.net.au \
 	activ8.net.au spirit.com.au tpg.com.au telstra.com.au"
