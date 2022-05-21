@@ -6,8 +6,8 @@
 # By Steve Jenkins (https://www.stevejenkins.com/)                #
 ###################################################################
 
-version="3.7"
-lastupdated="15 June 2021"
+version="3.7.1"
+lastupdated="24 Jan 2022"
 
 # Usage: 1) Place entire /postwhite directory in /usr/local/bin
 #	 2) Move postwhite.conf to /etc
@@ -53,14 +53,14 @@ bulk_hosts="amazonses.com authsmtp.com constantcontact.com \
 	icontact.com mailchimp.com mailgun.com mailjet.com messagelabs.com \
 	messagegears.net sendgrid.com sendgrid.net sparkpost.com sparkpostmail.com \
 	alibabacloud.com spf1.dm.aliyun.com aliyun.com relay.mailchannels.net mailchannels.net \
-	srv2.de"
+	srv2.de mx.ovh.com smtp2go.com spf.smtp2go.com"
 	
 isp_hosts="optusnet.com.au bigpond.com iinet.net.au internode.on.net apn.net.au \
 	activ8.net.au spirit.com.au tpg.com.au telstra.com.au"
 
 misc_hosts="github.com zendesk.com adobe.com repairtechsolutions.com repairshopr.com simple-help.com \
 	freshdesk.com sender1.freshdesk.com sender2.freshdesk.com emailus.freshdesk.com emaileuc.freshdesk.com \
-	sg-warmup.freshemail.io"
+	sg-warmup.freshemail.io dropbox.com"
 
 permit_line_v4="%s\tpermit\n"
 reject_line_v4="%s\treject\n"

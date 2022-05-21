@@ -53,6 +53,16 @@ temp_file=$(mktemp --tmpdir ovh_hosts.XXXXXXXXXX)
 
 debug "Querying outbound IP addresses. This could take a while...\n"
 
+# OVR internal mailers
+
+for a in {1..99}; do
+    for b in {1..99}; do
+	host stmpout${a}.cr${b}.mail-out.ovh.ca 2>&1
+    done;
+    : ${b++}
+done > "${temp_file}"
+   
+
 # Query user-defined mailer range
 #
 # OVH uses the format: ${a}.mo${b}.mail-out.ovh.net;
@@ -74,7 +84,7 @@ for b in {1..300}; do
             echo "you should edit this script and increase the max range for 'a'." 1>&2
         fi
     fi
-done > "${temp_file}"
+done >> "${temp_file}"
 
 : ${b++}
 

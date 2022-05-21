@@ -15,7 +15,7 @@ lastupdated="18 October 2021"
 
 # Verizon, AOL and Yahoo servers have merged.
 # New Owners 2021 - Appolo Global Management
-yahoo_url="https://postmaster.yahooinc.com/mail-servers"
+yahoo_url="https://senders.yahooinc.com/outbound-mail-servers/"
 
 # NO NEED TO EDIT PAST THIS LINE
 
@@ -65,6 +65,10 @@ ipv6_mailers=$(echo "$content" | grep -E -o '(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F
 
 # Append IPv6 hosts to newly-created Yahoo! mailer list
 echo "$ipv6_mailers" >> "$yahoo_static_hosts"
+
+# Clean out B.S IPv6 records..
+sed -i '/ipv6:::/d' $yahoo_static_hosts
+sed -i '/ipv6:ea::/d' $yahoo_static_hosts
 
 printf '\nYahoo/AOL! outbound mailers updated.\n'
 
