@@ -60,7 +60,7 @@ isp_hosts="optusnet.com.au bigpond.com iinet.net.au internode.on.net apn.net.au 
 
 misc_hosts="github.com zendesk.com adobe.com repairtechsolutions.com repairshopr.com simple-help.com \
 	freshdesk.com sender1.freshdesk.com sender2.freshdesk.com emailus.freshdesk.com emaileuc.freshdesk.com \
-	sg-warmup.freshemail.io dropbox.com"
+	sg-warmup.freshemail.io dropbox.com evidence.com"
 
 permit_line_v4="%s\tpermit\n"
 reject_line_v4="%s\treject\n"
