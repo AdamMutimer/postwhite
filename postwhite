@@ -289,6 +289,13 @@ if [ x"$include_ovh" = x"yes" ] ; then
         cat "${ovh_static_hosts}" >> "${tmp1}"
 fi
 
+if [ x"$include_proofpoint" = x"yes" ] ; then
+        printf "\nIncluding scraped ProofPoint! outbound hosts...\n"
+
+        cat "${proofpoint_static_hosts}" >> "${tmp1}"
+fi
+
+
 if [ x"$include_custom" = x"yes" ] ; then
         printf "\nIncluding Custom IP outbound hosts...\n"
 
