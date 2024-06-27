@@ -53,14 +53,14 @@ bulk_hosts="amazonses.com authsmtp.com constantcontact.com \
 	icontact.com mailchimp.com mailgun.com mailjet.com messagelabs.com \
 	messagegears.net sendgrid.com sendgrid.net sparkpost.com sparkpostmail.com \
 	alibabacloud.com spf1.dm.aliyun.com aliyun.com relay.mailchannels.net mailchannels.net \
-	srv2.de mx.ovh.com smtp2go.com smtp2go.com jangomail.com sendinblue.com"
+	srv2.de mx.ovh.com smtp2go.com smtp2go.com jangomail.com sendinblue.com crisp.email"
 	
 isp_hosts="optusnet.com.au bigpond.com iinet.net.au internode.on.net apn.net.au \
 	activ8.net.au spirit.com.au tpg.com.au telstra.com.au"
 
 misc_hosts="github.com zendesk.com adobe.com repairtechsolutions.com repairshopr.com simple-help.com \
 	freshdesk.com sender1.freshdesk.com sender2.freshdesk.com emailus.freshdesk.com emaileuc.freshdesk.com \
-	sg-warmup.freshemail.io dropbox.com evidence.com"
+	sg-warmup.freshemail.io dropbox.com evidence.com qintil.com emails.qintil.com"
 
 permit_line_v4="%s\tpermit\n"
 reject_line_v4="%s\treject\n"
@@ -295,6 +295,11 @@ if [ x"$include_proofpoint" = x"yes" ] ; then
         cat "${proofpoint_static_hosts}" >> "${tmp1}"
 fi
 
+if [ x"$include_sparkpost" = x"yes" ] ; then
+        printf "\nIncluding scraped SparkPost! outbound hosts...\n"
+        
+        cat "${sparkpost_static_hosts}" >> "${tmp1}"
+fi
 
 if [ x"$include_custom" = x"yes" ] ; then
         printf "\nIncluding Custom IP outbound hosts...\n"
@@ -310,6 +315,8 @@ if [ x"$enable_blacklist" = x"yes" ] ; then
 	done
 fi
 
+cat "${tmp1}" >> test_dump.txt
+
 # If enabled, simplify (remove) any individual IPs already included in CIDR ranges (disabled by default)
 if [ x"$simplify" = x"yes" ]; then
 	printf "\nSimplifying whitelist IP addresses already included in CIDR ranges. These calculations\n"
@@ -320,6 +327,7 @@ if [ x"$simplify" = x"yes" ]; then
 
 	if [ x"$enable_blacklist" = x"yes" ] ; then
 		printf "\nSimplifying blacklist IP addresses already included in CIDR ranges. These calculations\n"
+
 			printf "can take a LONG time if you have many mailers selected. Please be patient..."
 			cat "${blktmp1}" | sort -u | "${spftoolspath}"/simplify.sh > "${blktmp2}" &
 			show_dots "$!"

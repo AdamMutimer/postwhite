@@ -1,0 +1,46 @@
+#!/bin/bash
+
+starting_ip="192.174.80.0"
+ending_ip="192.174.95.254"
+
+# Parse the starting IP
+IFS='.' read -r -a start_ip <<< "$starting_ip"
+IFS='.' read -r -a end_ip <<< "$ending_ip"
+
+# Validate the starting and ending IPs
+if [ ${#start_ip[@]} -ne 4 ] || [ ${#end_ip[@]} -ne 4 ]; then
+    echo "Invalid IP format. Please use the format x.i.j.k"
+    exit 1
+fi
+
+# Output file
+output_file="sparkpost_static_hosts.txt"
+
+# Clear the output file if it exists
+> "$output_file"
+
+# Loop through each combination starting from the given IP to the ending IP
+for i in $(seq ${start_ip[1]} ${end_ip[1]}); do
+    for j in $(seq ${start_ip[2]} ${end_ip[2]}); do
+        for k in $(seq ${start_ip[3]} ${end_ip[3]}); do
+            # Construct the hostname
+            hostname="mta-$i-$j-$k.sparkpostmail.com"
+            echo "Resolving $hostname..."
+
+            # Resolve the hostname and append the IPs to the output file
+            ips=$(dig +short "$hostname" A)
+            if [ -n "$ips" ]; then
+                for ip in $ips; do
+		    echo "Resolved IPs for $hostname: $ips"
+                    echo "ip4:$ip" >> "$output_file"
+                done
+            else
+                echo "No IPs resolved for $hostname"
+            fi
+        done
+        start_ip[3]=0  # Reset the fourth octet to 0 after the first loop
+    done
+    start_ip[2]=0  # Reset the third octet to 0 after the first loop
+done
+
+echo "IP resolution complete. Results saved in $output_file."
